@@ -2,8 +2,6 @@ package com.ankuranurag2.smartband;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,11 +16,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.UUID;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     private byte[] buffer = new byte[8192];
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,11 +45,13 @@ public class MainActivity extends AppCompatActivity {
         toogleButton = (Button) findViewById(R.id.bt_toogle_button);
         listButton = (Button) findViewById(R.id.paired_device_button);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         activeList = new ArrayList<>();
 
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(mReceiver, filter);
+
 
         if (mBluetoothAdapter == null) {
             Toast.makeText(this, "Bluetooth not supported.", Toast.LENGTH_SHORT).show();
@@ -142,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
     public void setAdapter() {
         adapter = new PairedAdapter(pairedList,mBluetoothAdapter);
         btRecyclerView = (RecyclerView) findViewById(R.id.btlist_recycler_view);
@@ -161,62 +159,5 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
-//    private class AcceptData extends Thread {
-//        private final BluetoothServerSocket mmServerSocket;
-//        private BluetoothSocket socket = null;
-//        private InputStream mmInStream;
-//        private String device;
-//
-//        private AcceptData() {
-//            BluetoothServerSocket tmp = null;
-//            try {
-//                tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("Bluetooth", myUUID);
-//            } catch (IOException e) {
-//                //
-//            }
-//            mmServerSocket = tmp;
-//            try {
-//                socket = mmServerSocket.accept();
-//            } catch (IOException e) {
-//                //
-//            }
-//            device = socket.getRemoteDevice().getName();
-//            Toast.makeText(getBaseContext(), "Connected to " + device, Toast.LENGTH_SHORT).show();
-//            InputStream tmpIn = null;
-//            try {
-//                tmpIn = socket.getInputStream();
-//            } catch (IOException e) {
-//                //
-//            }
-//            mmInStream = tmpIn;
-//            int byteNo;
-//            try {
-//                byteNo = mmInStream.read(buffer);
-//                if (byteNo != -1) {
-//                    //ensure DATAMAXSIZE Byte is read.
-//                    int byteNo2 = byteNo;
-//                    int bufferSize = 7340;
-//                    while (byteNo2 != bufferSize) {
-//                        bufferSize = bufferSize - byteNo2;
-//                        byteNo2 = mmInStream.read(buffer, byteNo, bufferSize);
-//                        if (byteNo2 == -1) {
-//                            break;
-//                        }
-//                        byteNo = byteNo + byteNo2;
-//                    }
-//                }
-//                if (socket != null) {
-//                    try {
-//                        mmServerSocket.close();
-//                    } catch (IOException e) {
-//                        //
-//                    }
-//                }
-//            } catch (Exception e) {
-//                // TODO: handle exception
-//            }
-//        }
-//    }
 
 }

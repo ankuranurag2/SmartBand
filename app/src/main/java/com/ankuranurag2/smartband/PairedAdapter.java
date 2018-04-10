@@ -20,28 +20,30 @@ import java.util.UUID;
 
 public class PairedAdapter extends RecyclerView.Adapter<PairedAdapter.PairedViewHolder> {
 
-    ArrayList<BTDevice> pairedList=new ArrayList<>();
+
+    ArrayList<BTDevice> pairedList = new ArrayList<>();
     BluetoothAdapter adapter;
     private static final UUID myUUID = UUID.fromString("f07fc500-6289-405c-ab37-b015033a6bca");
 
-    public PairedAdapter(ArrayList<BTDevice> list,BluetoothAdapter adapter){
-        this.pairedList=list;
-        this.adapter=adapter;
+    public PairedAdapter(ArrayList<BTDevice> list, BluetoothAdapter adapter) {
+        this.pairedList = list;
+        this.adapter = adapter;
+        ArrayList<String> pairedList = new ArrayList<>();
     }
 
     @Override
     public PairedViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Context context=parent.getContext();
-        LayoutInflater inflater=(LayoutInflater)context
+        Context context = parent.getContext();
+        LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view=inflater
-                .inflate(R.layout.device_row,parent,false);
+        View view = inflater
+                .inflate(R.layout.device_row, parent, false);
         return new PairedViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(PairedViewHolder holder, int position) {
-        String name=pairedList.get(position).getDeviceName();
+        String name = pairedList.get(position).getDeviceName();
         holder.deviceName.setText(name);
     }
 
@@ -57,33 +59,33 @@ public class PairedAdapter extends RecyclerView.Adapter<PairedAdapter.PairedView
 
         public PairedViewHolder(final View itemView) {
             super(itemView);
-            deviceName=(TextView) itemView.findViewById(R.id.device_text_view);
-            layout=(LinearLayout)itemView.findViewById(R.id.device_layout);
+            deviceName = (TextView) itemView.findViewById(R.id.device_text_view);
+            layout = (LinearLayout) itemView.findViewById(R.id.device_layout);
 
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Thread thread=new Thread(){
+                    Thread thread = new Thread() {
                         @Override
                         public void run() {
-                            BluetoothSocket socket=null;
-                            BluetoothDevice device=adapter.getRemoteDevice(pairedList
+                            BluetoothSocket socket = null;
+                            BluetoothDevice device = adapter.getRemoteDevice(pairedList
                                     .get(getAdapterPosition()).getDeviceAddr());
                             try {
-                                socket=device.createRfcommSocketToServiceRecord(myUUID);
+                                socket = device.createRfcommSocketToServiceRecord(myUUID);
                                 adapter.cancelDiscovery();
-                            }catch (Exception e){
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                             try {
 
-                                    socket.connect();
+                                socket.connect();
 
-                            }catch (IOException e){
-                                try{
-                                    socket =(BluetoothSocket) device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", new Class[] {UUID.class}).invoke(device,myUUID);
+                            } catch (IOException e) {
+                                try {
+                                    socket = (BluetoothSocket) device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", new Class[]{UUID.class}).invoke(device, myUUID);
                                     socket.connect();
-                                }catch (Exception e2){
+                                } catch (Exception e2) {
                                     e2.printStackTrace();
                                 }
                             }

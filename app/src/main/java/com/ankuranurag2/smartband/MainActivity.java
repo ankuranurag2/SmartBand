@@ -14,12 +14,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-
-import app.akexorcist.bluetotohspp.library.BluetoothSPP;
-
-import static android.view.View.GONE;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView btRecyclerView;
     ArrayList<String> s;
     PairedAdapter adapter;
-    BluetoothSPP bt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
         btStatus = (ImageView) findViewById(R.id.bt_image_view);
         btToggle = (Button) findViewById(R.id.bt_button);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        bt = new BluetoothSPP(this);
         s = new ArrayList<String>();
 
         if (mBluetoothAdapter==null){
@@ -88,8 +81,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void setAdapter(){
-        Log.d("ankur", String.valueOf(s.size()));
-        adapter=new PairedAdapter(s,bt);
+        adapter=new PairedAdapter(s);
         btRecyclerView=(RecyclerView)findViewById(R.id.btlist_recycler_view) ;
         btRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         btRecyclerView.setAdapter(adapter);

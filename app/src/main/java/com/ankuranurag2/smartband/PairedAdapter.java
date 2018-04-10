@@ -10,21 +10,16 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import app.akexorcist.bluetotohspp.library.BluetoothSPP;
-import app.akexorcist.bluetotohspp.library.BluetoothState;
 
 
 public class PairedAdapter extends RecyclerView.Adapter<PairedAdapter.PairedViewHolder> {
 
     ArrayList<String> pairedList=new ArrayList<>();
-    BluetoothSPP bt;
 
-    public PairedAdapter(ArrayList<String> list, BluetoothSPP bt){
+    public PairedAdapter(ArrayList<String> list){
         this.pairedList=list;
-        this.bt=bt;
     }
 
     @Override
@@ -60,7 +55,6 @@ public class PairedAdapter extends RecyclerView.Adapter<PairedAdapter.PairedView
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    bt.startService(BluetoothState.DEVICE_ANDROID);
                 }
             });
 

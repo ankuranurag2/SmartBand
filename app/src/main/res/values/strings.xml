@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">SmartBand</string>
+    <string name="send_alert">Send Alert</string>
+    <string name="update_info">Update Info</string>
+    <string name="paired_devices">Paired Devices :</string>
+    <string name="turn_bt_on">TURN BT ON</string>
+    <string name="bluetooth_status">Bluetooth Status</string>
 </resources>

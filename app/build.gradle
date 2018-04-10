@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.ankuranurag2.smartband"
         minSdkVersion 19
@@ -26,8 +26,11 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    testCompile 'junit:junit:4.12'
     compile 'com.android.support:cardview-v7:26.0.0-alpha1'
     compile 'com.akexorcist:bluetoothspp:1.0.0'
     compile 'com.android.support:recyclerview-v7:26.0.0-alpha1'
+    compile 'com.android.support:support-compat:25.1.1'
+    compile 'com.daimajia.easing:library:2.0@aar'
+    compile 'com.daimajia.androidanimations:library:2.3@aar'
+    testCompile 'junit:junit:4.12'
 }

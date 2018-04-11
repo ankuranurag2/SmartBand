@@ -16,7 +16,7 @@ public class PermissionUtils {
     public static void requestPermission(final Activity activity, int REQUEST_CODE) {
         String[] perms = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN,
                 Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA};
+                Manifest.permission.ACCESS_COARSE_LOCATION};
 
         if (!hasPermissions(activity,perms)){
             ActivityCompat.requestPermissions(activity, perms, REQUEST_CODE);

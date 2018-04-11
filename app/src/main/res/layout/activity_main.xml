@@ -2,88 +2,77 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_marginStart="5dp"
     android:layout_marginEnd="5dp"
-    android:layout_marginTop="5dp">
-
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:padding="10dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:fontFamily="sans-serif"
-                android:gravity="start"
-                android:text="@string/bluetooth_status"
-                android:textAlignment="center"
-                android:textColor="#000"
-                android:textSize="18sp" />
-
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-
-            <ImageView
-                android:id="@+id/bt_image_view"
-                android:layout_width="50dp"
-                android:layout_height="match_parent"
-                android:background="#F44336" />
-        </LinearLayout>
-
-    </android.support.v7.widget.CardView>
+    android:layout_marginStart="5dp"
+    android:layout_marginTop="5dp"
+    android:background="#fff"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:elevation="2dp"
         android:orientation="horizontal"
-        android:gravity="center"
+        android:padding="15dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fontFamily="sans-serif"
+            android:gravity="start"
+            android:text="@string/bluetooth_status"
+            android:textAlignment="center"
+            android:textColor="#000"
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <Switch
+            android:id="@+id/btSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textOff="OFF"
+            android:textOn="ON" />
+    </LinearLayout>
+
+    <LinearLayout
         style="?android:attr/buttonBarStyle"
-        android:layout_marginTop="5dp">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <Button
+            android:id="@+id/get"
             style="?android:attr/buttonBarButtonStyle"
-            android:id="@+id/bt_toogle_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/turn_bt_on" />
+            android:text="@string/update_info" />
+
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/paired_device_button"
-            android:text="@string/update_info"
+            android:id="@+id/track"
             style="?android:attr/buttonBarButtonStyle"
-            android:enabled="false"/>
-        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/send_sms_button"
-            android:text="@string/send_alert"
-            android:onClick="sendSMS"
-            style="?android:attr/buttonBarButtonStyle"/>
+            android:text="@string/update_info_new" />
     </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
+        android:fontFamily="sans-serif"
         android:text="@string/paired_devices"
         android:textColor="#000"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/btlist_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/shape"/>
+        android:background="@drawable/shape" />
 </LinearLayout>

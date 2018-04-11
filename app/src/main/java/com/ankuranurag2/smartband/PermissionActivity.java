@@ -20,9 +20,9 @@ public class PermissionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_permission);
 
-        YoYo.with(Techniques.ZoomInDown)
-                .duration(2000)
-                .playOn(findViewById(R.id.app_logo_tv));
+        YoYo.with(Techniques.BounceIn)
+                .duration(2500)
+                .playOn(findViewById(R.id.imageView));
 
         PermissionUtils.requestPermission(this, PERMISSION_REQUEST_CODE);
 
@@ -37,7 +37,7 @@ public class PermissionActivity extends AppCompatActivity {
                     startActivity(new Intent(this,MainActivity.class));
                     this.finish();
                 }else{
-                    Toast.makeText(this, "Permission Denied.\n The app might not work!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Permission Denied.\n The app might not work properly!", Toast.LENGTH_SHORT).show();
                 }
             }
             break;

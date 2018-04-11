@@ -186,16 +186,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil
-                .isGooglePlayServicesAvailable(this);
+
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this,
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();
             } else {
-                Toast.makeText(getApplicationContext(),
-                        "This device is not supported.", Toast.LENGTH_LONG)
-                        .show();
+                Toast.makeText(getApplicationContext(), "This device is not supported.", Toast.LENGTH_LONG).show();
                 finish();
             }
             return false;
@@ -227,17 +226,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
                 int status = locationSettingsResult.getStatus().getStatusCode();
                 switch (status) {
-                    case LocationSettingsStatusCodes.SUCCESS: {
+                    case LocationSettingsStatusCodes.SUCCESS:
                         getLocation();
-                    }
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED: {
+                        break;
+
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try {
                             locationSettingsResult.getStatus().startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
                         } catch (IntentSender.SendIntentException e) {
                             e.printStackTrace();
                         }
-                    }
-
+                        break;
                 }
             }
         });

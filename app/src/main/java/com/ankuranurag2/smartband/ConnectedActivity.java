@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothSocket;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,8 +27,8 @@ public class ConnectedActivity extends AppCompatActivity {
     String deviceName, deviceAddress;
     boolean isConnected = false;
 
-    BluetoothAdapter mBluetoothAdapter=null;
-    BluetoothSocket btSocket=null;
+    BluetoothAdapter mBluetoothAdapter = null;
+    BluetoothSocket btSocket = null;
 
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -51,9 +52,14 @@ public class ConnectedActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!isConnected)
                     new ConnectBT().execute();
-                else{
+                else {
                     try {
+                        progress = ProgressDialog.show(ConnectedActivity.this, "Disconnecting...", "Please wait!!!");
                         btSocket.close();
+                        isConnected = false;
+                        statusIv.setBackgroundColor(getResources().getColor(R.color.red));
+                        connectBtn.setText("CONNECT");
+                        progress.dismiss();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -92,7 +98,7 @@ public class ConnectedActivity extends AppCompatActivity {
 
             if (!ConnectSuccess) {
                 Toast.makeText(ConnectedActivity.this, "Connection Failed.\nMake sure device is SPP Bluetooth device!", Toast.LENGTH_SHORT).show();
-                isConnected=false;
+                isConnected = false;
                 statusIv.setBackgroundColor(getResources().getColor(R.color.red));
                 connectBtn.setText("CONNECT");
             } else {
@@ -102,6 +108,16 @@ public class ConnectedActivity extends AppCompatActivity {
                 connectBtn.setText("DISCONNECT");
             }
             progress.dismiss();
+        }
+    }
+
+    public void sendSMS(String phoneNo, String msg) {
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNo, null, msg, null, null);
+            Toast.makeText(getApplicationContext(), "Message Sent", Toast.LENGTH_SHORT).show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }

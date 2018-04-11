@@ -2,9 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginEnd="5dp"
-    android:layout_marginStart="5dp"
-    android:layout_marginTop="5dp"
     android:background="#fff"
     android:orientation="vertical">
 
@@ -13,15 +10,12 @@
         android:layout_height="wrap_content"
         android:elevation="2dp"
         android:orientation="horizontal"
-        android:padding="15dp">
+        android:padding="10dp">
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:fontFamily="sans-serif"
-            android:gravity="start"
+            android:layout_height="wrap_content"
             android:text="@string/bluetooth_status"
-            android:textAlignment="center"
             android:textColor="#000"
             android:textSize="18sp" />
 
@@ -50,6 +44,8 @@
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_weight="1"
             android:text="@string/update_info" />
 
         <Button
@@ -57,21 +53,42 @@
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
             android:text="@string/update_info_new" />
     </LinearLayout>
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:fontFamily="sans-serif"
-        android:text="@string/paired_devices"
-        android:textColor="#000"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/paired_devices"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/refresh"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:text="REFRESH LIST" />
+    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/btlist_recycler_view"
+        android:id="@+id/recylerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/shape" />

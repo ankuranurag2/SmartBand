@@ -2,6 +2,7 @@ package com.ankuranurag2.smartband;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -14,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -37,6 +39,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -44,8 +47,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //Views
     Switch btSwitch;
     Boolean btStatus;
-    Button getBtn, trackBtn;
+    Button getBtn, trackBtn, refresh;
     BluetoothAdapter mBluetoothAdapter;
+    RecyclerView recyclerView;
 
     //Data
     double lati, longi;
@@ -76,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         btSwitch = (Switch) findViewById(R.id.btSwitch);
         getBtn = (Button) findViewById(R.id.get);
         trackBtn = (Button) findViewById(R.id.track);
+        refresh = (Button) findViewById(R.id.refresh);
+        recyclerView = (RecyclerView) findViewById(R.id.recylerview);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -87,10 +93,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 btStatus = isChecked;
-                if (isChecked)
+                if (isChecked) {
+                    refresh.setEnabled(true);
                     mBluetoothAdapter.enable();
-                else
+                } else {
+                    refresh.setEnabled(false);
                     mBluetoothAdapter.disable();
+                }
             }
         });
 
@@ -107,6 +116,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if (checkPlayServices()) {
                     buildGoogleApiClient();
                 }
+            }
+        });
+
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArrayList<BTDevice> pairedList = new ArrayList<BTDevice>();
+                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                for (BluetoothDevice device : pairedDevices) {
+                    BTDevice btDevice = new BTDevice();
+                    btDevice.setDeviceName(device.getName());
+                    btDevice.setDeviceAddr(device.getAddress());
+                    pairedList.add(btDevice);
+                }
+                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                recyclerView.hasFixedSize();
+                recyclerView.setAdapter(new PairedAdapter(pairedList));
             }
         });
     }

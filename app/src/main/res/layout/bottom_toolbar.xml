@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <View style="@style/divider" />
+
+    <LinearLayout
+        android:id="@+id/footer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#424242"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/connect"
+            style="@style/bottom_toolbar_item"
+            android:drawableTop="@drawable/ic_bt_connect"
+            android:text="CONNECT" />
+        <TextView
+            android:id="@+id/refresh"
+            style="@style/bottom_toolbar_item"
+            android:drawableTop="@drawable/ic_refresh"
+            android:text="REFRESH LIST"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/gps"
+            style="@style/bottom_toolbar_item"
+            android:drawableTop="@drawable/ic_gps_on"
+            android:text="LOCATE" />
+
+        <TextView
+            android:id="@+id/locate"
+            style="@style/bottom_toolbar_item"
+            android:drawableTop="@drawable/ic_locate"
+            android:text="TRACK" />
+    </LinearLayout>
+</LinearLayout>

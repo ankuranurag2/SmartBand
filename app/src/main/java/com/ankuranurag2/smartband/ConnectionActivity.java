@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,7 +17,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.util.UUID;
 
-public class ConnectedActivity extends AppCompatActivity {
+public class ConnectionActivity extends AppCompatActivity {
 
     //Views
     ImageView statusIv;
@@ -54,11 +55,12 @@ public class ConnectedActivity extends AppCompatActivity {
                     new ConnectBT().execute();
                 else {
                     try {
-                        progress = ProgressDialog.show(ConnectedActivity.this, "Disconnecting...", "Please wait!!!");
+                        progress = ProgressDialog.show(ConnectionActivity.this, "Disconnecting...", "Please wait!!!");
                         btSocket.close();
                         isConnected = false;
-                        statusIv.setBackgroundColor(getResources().getColor(R.color.red));
+                        statusIv.setBackgroundColor(Color.RED);
                         connectBtn.setText("CONNECT");
+                        connectBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_bt_connect,0,0);
                         progress.dismiss();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -73,7 +75,7 @@ public class ConnectedActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            progress = ProgressDialog.show(ConnectedActivity.this, "Connecting...", "Please wait!!!");
+            progress = ProgressDialog.show(ConnectionActivity.this, "Connecting...", "Please wait!!!");
         }
 
         @Override
@@ -97,14 +99,16 @@ public class ConnectedActivity extends AppCompatActivity {
             super.onPostExecute(result);
 
             if (!ConnectSuccess) {
-                Toast.makeText(ConnectedActivity.this, "Connection Failed.\nMake sure device is SPP Bluetooth device!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ConnectionActivity.this, "Connection Failed.Make sure device is SPP Bluetooth device!!!", Toast.LENGTH_SHORT).show();
                 isConnected = false;
-                statusIv.setBackgroundColor(getResources().getColor(R.color.red));
+                statusIv.setBackgroundColor(Color.RED);
+                connectBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_bt_connect,0,0);
                 connectBtn.setText("CONNECT");
             } else {
-                Toast.makeText(ConnectedActivity.this, "Connected.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ConnectionActivity.this, "Connected.", Toast.LENGTH_SHORT).show();
                 isConnected = true;
-                statusIv.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                statusIv.setBackgroundColor(getResources().getColor(R.color.material_green));
+                connectBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_bt_disabled,0,0);
                 connectBtn.setText("DISCONNECT");
             }
             progress.dismiss();

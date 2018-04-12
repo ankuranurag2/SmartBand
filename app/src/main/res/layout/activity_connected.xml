@@ -3,50 +3,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#fff"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:orientation="horizontal"
-        android:padding="15dp">
+        android:padding="15dp"
+        android:layout_weight="1">
 
         <TextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:text="Device Name"
-            android:gravity="center"
             android:textColor="#000"
             android:textSize="18sp"/>
 
         <Space
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/status"
             android:layout_width="50dp"
             android:layout_height="30dp"
-            android:background="@color/red" />
+            android:background="@color/material_red" />
     </LinearLayout>
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <TextView
-        android:id="@+id/connect"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
-        android:text="CONNECT"
-        android:textColor="#ffffff"
-        android:gravity="center"
-        android:paddingTop="15dp"
-        android:paddingBottom="15dp"
-        android:textSize="18sp"/>
+<include
+    layout="@layout/bottom_toolbar"/>
 </LinearLayout>

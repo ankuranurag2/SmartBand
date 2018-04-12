@@ -1,16 +1,13 @@
 package com.ankuranurag2.smartband;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.util.ArrayList;
-import java.util.UUID;
 
 
 public class PairedAdapter extends RecyclerView.Adapter<PairedAdapter.PairedViewHolder> {
@@ -53,7 +50,7 @@ public class PairedAdapter extends RecyclerView.Adapter<PairedAdapter.PairedView
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent=new Intent(itemView.getContext(),ConnectedActivity.class);
+                    Intent intent=new Intent(itemView.getContext(),ConnectionActivity.class);
                     intent.putExtra("name",pairedList.get(getAdapterPosition()).getDeviceName());
                     intent.putExtra("add",pairedList.get(getAdapterPosition()).getDeviceAddr());
                     itemView.getContext().startActivity(intent);

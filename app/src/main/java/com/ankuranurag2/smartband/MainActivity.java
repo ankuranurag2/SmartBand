@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -17,11 +18,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.Switch;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -45,15 +44,15 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     //Views
-    Switch btSwitch;
-    Boolean btStatus;
-    Button getBtn, trackBtn, refresh;
+    TextView gpsBtn, locateBtn, refresh, connect;
+    LinearLayout footer;
     BluetoothAdapter mBluetoothAdapter;
     RecyclerView recyclerView;
 
     //Data
     double lati, longi;
     String address;
+    Boolean btStatus;
 
     //GPS
     GoogleApiClient mGoogleApiClient;
@@ -77,42 +76,54 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btSwitch = (Switch) findViewById(R.id.btSwitch);
-        getBtn = (Button) findViewById(R.id.get);
-        trackBtn = (Button) findViewById(R.id.track);
-        refresh = (Button) findViewById(R.id.refresh);
+        connect = (TextView) findViewById(R.id.connect);
+        gpsBtn = (TextView) findViewById(R.id.gps);
+        locateBtn = (TextView) findViewById(R.id.locate);
+        refresh = (TextView) findViewById(R.id.refresh);
+        footer = (LinearLayout) findViewById(R.id.footer_layout);
         recyclerView = (RecyclerView) findViewById(R.id.recylerview);
 
+        refresh.setVisibility(View.VISIBLE);
+        connect.setText("TURN ON");
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        btStatus = mBluetoothAdapter.isEnabled();
 
         if (checkPlayServices()) {
             buildGoogleApiClient();
         }
 
-        btSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        connect.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                btStatus = isChecked;
-                if (isChecked) {
-                    refresh.setEnabled(true);
+            public void onClick(View v) {
+                if (!btStatus) {
+                    footer.setBackgroundColor(getResources().getColor(R.color.material_green));
                     mBluetoothAdapter.enable();
+                    btStatus=true;
+                    connect.setText("TURN OFF");
+                    connect.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_disabled, 0, 0);
                 } else {
-                    refresh.setEnabled(false);
+                    footer.setBackgroundColor(Color.RED);
                     mBluetoothAdapter.disable();
+                    btStatus=false;
+                    connect.setText("TURN ON");
+                    connect.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_connect, 0, 0);
                 }
             }
         });
 
-        trackBtn.setOnClickListener(new View.OnClickListener() {
+        locateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                footer.setBackgroundColor(getResources().getColor(R.color.material_pink));
                 togglePeriodicLocationUpdates();
             }
         });
 
-        getBtn.setOnClickListener(new View.OnClickListener() {
+        gpsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                footer.setBackgroundColor(getResources().getColor(R.color.material_purple));
                 if (checkPlayServices()) {
                     buildGoogleApiClient();
                 }
@@ -122,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                footer.setBackgroundColor(getResources().getColor(R.color.material_blue));
                 ArrayList<BTDevice> pairedList = new ArrayList<BTDevice>();
                 Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
                 for (BluetoothDevice device : pairedDevices) {
@@ -283,11 +295,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
         if (!mRequestingLocationUpdates) {
-            trackBtn.setText("STOP LOCATION TRACKING");
+            locateBtn.setText("DON'T TRACK");
+            locateBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_location_off,0,0);
             mRequestingLocationUpdates = true;
             startLocationUpdates();
         } else {
-            trackBtn.setText("START LOCATION TRACKING");
+            locateBtn.setText("TRACK");
+            locateBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_locate,0,0);
             mRequestingLocationUpdates = false;
             stopLocationUpdates();
         }

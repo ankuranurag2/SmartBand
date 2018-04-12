@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -178,6 +179,11 @@ public class ConnectionActivity extends AppCompatActivity {
     }
 
     public void sendSMS(String phoneNo, String msg) {
+        SharedPreferences pref=getSharedPreferences(MainActivity.MY_PREFS_NAME,MODE_PRIVATE);
+        String lat=pref.getString("lat","0");
+        String lon=pref.getString("long","0");
+        String address=pref.getString("add","");
+
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNo, null, msg, null, null);

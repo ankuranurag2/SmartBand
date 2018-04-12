@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Address;
@@ -19,10 +20,12 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ankuranurag2.smartband.Utils.PermissionUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -44,7 +47,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     //Views
-    TextView gpsBtn, locateBtn, refresh, connect;
+    TextView gpsBtn, locateBtn, home, connect;
+    Button refresh;
     LinearLayout footer;
     BluetoothAdapter mBluetoothAdapter;
     RecyclerView recyclerView;
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
     private final static int REQUEST_CHECK_SETTINGS = 420;
+    public static final String MY_PREFS_NAME = "MyPrefsFile";
 
     //TRACKING
     boolean mRequestingLocationUpdates = false;
@@ -79,11 +84,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         connect = (TextView) findViewById(R.id.connect);
         gpsBtn = (TextView) findViewById(R.id.gps);
         locateBtn = (TextView) findViewById(R.id.locate);
-        refresh = (TextView) findViewById(R.id.refresh);
+        home = (TextView) findViewById(R.id.homee);
+        refresh = (Button) findViewById(R.id.refresh);
         footer = (LinearLayout) findViewById(R.id.footer_layout);
         recyclerView = (RecyclerView) findViewById(R.id.recylerview);
 
-        refresh.setVisibility(View.VISIBLE);
         connect.setText("TURN ON");
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -133,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                footer.setBackgroundColor(getResources().getColor(R.color.material_blue));
                 ArrayList<BTDevice> pairedList = new ArrayList<BTDevice>();
                 Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
                 for (BluetoothDevice device : pairedDevices) {
@@ -145,6 +149,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                 recyclerView.hasFixedSize();
                 recyclerView.setAdapter(new PairedAdapter(pairedList));
+            }
+        });
+
+        home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                footer.setBackgroundColor(getResources().getColor(R.color.material_blue));
+                PermissionUtils.showAlert(MainActivity.this);
             }
         });
     }
@@ -262,6 +274,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
             if (location != null) {
+                home.setEnabled(true);
                 mLastLocation = location;
                 lati = location.getLatitude();
                 longi = location.getLongitude();
@@ -276,7 +289,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                Toast.makeText(this, address, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, String.valueOf(lati), Toast.LENGTH_SHORT).show();
+                SharedPreferences.Editor editor=getSharedPreferences(MY_PREFS_NAME,MODE_PRIVATE).edit();
+                editor.putString("lat",String.valueOf(lati));
+                editor.putString("long",String.valueOf(longi));
+                editor.putString("add",String.valueOf(address));
+                editor.apply();
             } else {
                 Toast.makeText(this, "Fetching Your Location", Toast.LENGTH_SHORT).show();
             }

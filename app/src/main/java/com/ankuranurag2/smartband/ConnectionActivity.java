@@ -4,13 +4,11 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -146,8 +144,10 @@ public class ConnectionActivity extends AppCompatActivity {
             try {
                 if (btSocket == null || !isConnected) {
                     mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();//get the mobile bluetooth device
-                    BluetoothDevice dispositivo = mBluetoothAdapter.getRemoteDevice(deviceAddress);//connects to the device's address and checks if it's available
-                    btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);//create a RFCOMM (SPP) connection
+                    if (!mBluetoothAdapter.isEnabled())
+                        mBluetoothAdapter.enable();
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceAddress);//connects to the device's address and checks if it's available
+                    btSocket = device.createInsecureRfcommSocketToServiceRecord(myUUID);//create a RFCOMM (SPP) connection
                     BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
                     btSocket.connect();//start connection
                 }
@@ -175,21 +175,6 @@ public class ConnectionActivity extends AppCompatActivity {
                 connectBtn.setText("DISCONNECT");
             }
             progress.dismiss();
-        }
-    }
-
-    public void sendSMS(String phoneNo, String msg) {
-        SharedPreferences pref=getSharedPreferences(MainActivity.MY_PREFS_NAME,MODE_PRIVATE);
-        String lat=pref.getString("lat","0");
-        String lon=pref.getString("long","0");
-        String address=pref.getString("add","");
-
-        try {
-            SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(phoneNo, null, msg, null, null);
-            Toast.makeText(getApplicationContext(), "Message Sent", Toast.LENGTH_SHORT).show();
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -228,13 +213,13 @@ public class ConnectionActivity extends AppCompatActivity {
             }
         }
 
-        /* Call this from the main activity to send data to the remote device */
-        public void write(String message) {
-            byte[] msgBuffer = message.getBytes();
-            try {
-                mmOutStream.write(msgBuffer);
-            } catch (IOException e) {
-            }
-        }
+        //TO SEND DATA
+//        public void write(String message) {
+//            byte[] msgBuffer = message.getBytes();
+//            try {
+//                mmOutStream.write(msgBuffer);
+//            } catch (IOException e) {
+//            }
+//        }
     }
 }

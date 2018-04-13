@@ -10,13 +10,15 @@ import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.os.Build;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.ankuranurag2.smartband.MainActivity;
+
+import java.text.DecimalFormat;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -60,6 +62,13 @@ public class PermissionUtils {
         String lon = pref.getString("long", "0");
         String address = pref.getString("add", "");
 
+        String homLat= pref.getString("homeLat","0");
+        String homLong= pref.getString("homeLong","0");
+
+        double distance=getDistanceBetweenTwoPoints(new PointF(Float.valueOf(homLat),Float.valueOf(homLong)),new PointF(Float.valueOf(lat),Float.valueOf(lon)));
+        String d=new DecimalFormat("##.00").format(distance/1000)+" KM";
+        String message="I NEED YOUR URGENT HELP!!!\nMy Location is\nLatitude: "+lat+"\nLongitude: "+lon+"\n"+d+" away from home.";
+        Log.d("TAG",message);
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNo, null, msg, null, null);

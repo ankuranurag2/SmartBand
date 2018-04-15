@@ -23,12 +23,11 @@
             android:layout_height="match_parent"
             android:layout_weight="1" />
 
-        <Switch
-            android:id="@+id/btSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:textOff="OFF"
-            android:textOn="ON" />
+        <ImageView
+            android:id="@+id/status"
+            android:layout_width="50dp"
+            android:layout_height="30dp"
+            android:background="@color/material_red" />
     </LinearLayout>
 
     <LinearLayout
@@ -44,6 +43,7 @@
             android:textColor="#000"
             android:textSize="20sp"
             android:textStyle="bold" />
+
         <Space
             android:layout_width="0dp"
             android:layout_height="match_parent"

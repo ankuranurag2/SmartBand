@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -14,16 +15,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ankuranurag2.smartband.Utils.PermissionUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ConnectionActivity extends AppCompatActivity {
 
     //Views
     ImageView statusIv;
-    TextView nameTv, connectBtn;
+    TextView nameTv, connectBtn, contactBtn, recieveBtn, gpsBtn,locateBtn,home,removeBtn;
     ProgressDialog progress;
     Handler handler;
 
@@ -48,12 +56,25 @@ public class ConnectionActivity extends AppCompatActivity {
         deviceAddress = getIntent().getExtras().getString("add");
 
         connectBtn = (TextView) findViewById(R.id.connect);
+        contactBtn = (TextView) findViewById(R.id.contact);
+        recieveBtn = (TextView) findViewById(R.id.recieve);
+        removeBtn = (TextView) findViewById(R.id.remove);
+        gpsBtn = (TextView) findViewById(R.id.gps);
+        locateBtn = (TextView) findViewById(R.id.locate);
+        home = (TextView) findViewById(R.id.homee);
         nameTv = (TextView) findViewById(R.id.name);
         statusIv = (ImageView) findViewById(R.id.status);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         sb = new StringBuilder();
 
         nameTv.setText(deviceName);
+        gpsBtn.setVisibility(View.GONE);
+        locateBtn.setVisibility(View.GONE);
+        home.setVisibility(View.GONE);
+        contactBtn.setVisibility(View.VISIBLE);
+        recieveBtn.setVisibility(View.VISIBLE);
+        removeBtn.setVisibility(View.VISIBLE);
+
 
         connectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,6 +94,27 @@ public class ConnectionActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+            }
+        });
+
+        contactBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PermissionUtils.showContactAlert(ConnectionActivity.this);
+            }
+        });
+
+        removeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        recieveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
 
@@ -170,7 +212,7 @@ public class ConnectionActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(ConnectionActivity.this, "Connected.", Toast.LENGTH_SHORT).show();
                 isConnected = true;
-                statusIv.setBackgroundColor(getResources().getColor(R.color.material_green));
+                statusIv.setBackgroundColor(Color.GREEN);
                 connectBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_bt_disabled,0,0);
                 connectBtn.setText("DISCONNECT");
             }

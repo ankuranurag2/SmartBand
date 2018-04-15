@@ -21,6 +21,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     LinearLayout footer;
     BluetoothAdapter mBluetoothAdapter;
     RecyclerView recyclerView;
+    ImageView status;
 
     //Data
     double lati, longi;
@@ -61,20 +63,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //GPS
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
-    private final static int LOCATION_REQUEST_CODE = 101;
 
+    //REQUEST CODES
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST_CODE = 901;
+    private final static int LOCATION_REQUEST_CODE = 902;
+    private final static int CHECK_SETTINGS_REQUEST_CODE = 903;
 
-    private final static int REQUEST_CHECK_SETTINGS = 420;
-    public static final String MY_PREFS_NAME = "MyPrefsFile";
+    //SHARED PREFRENCES KEYS
+    public final static String MY_PREFS_NAME = "MyPrefsFile";
+    public final static String PREF_CONTACT_LIST = "contactList";
+    public final static String PREF_HOME_LAT = "homeLat";
+    public final static String PREF_HOME_LONG = "homeLong";
+    public final static String PREF_LATEST_LAT = "lat";
+    public final static String PREF_LATEST_LONG = "long";
+    public final static String PREF_LATEST_ADDRESS = "add";
 
-    //TRACKING
+    //TRACKING VARIABLES
     boolean mRequestingLocationUpdates = false;
     LocationRequest mLocationRequest;
     private static int UPDATE_INTERVAL = 10000; // 10 sec
     private static int FATEST_INTERVAL = 5000; // 5 sec
     private static int DISPLACEMENT = 10; // 10 meters
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,15 +97,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         refresh = (Button) findViewById(R.id.refresh);
         footer = (LinearLayout) findViewById(R.id.footer_layout);
         recyclerView = (RecyclerView) findViewById(R.id.recylerview);
-
-        connect.setText("TURN ON");
+        status = (ImageView) findViewById(R.id.status);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         btStatus = mBluetoothAdapter.isEnabled();
-
-        if (checkPlayServices()) {
-            buildGoogleApiClient();
-        }
+        if (btStatus)
+            connect.setText("TURN OFF");
+        else
+            connect.setText("TURN ON");
 
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,14 +112,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if (!btStatus) {
                     footer.setBackgroundColor(getResources().getColor(R.color.material_green));
                     mBluetoothAdapter.enable();
-                    btStatus=true;
+                    btStatus = true;
                     connect.setText("TURN OFF");
+                    status.setBackgroundColor(Color.GREEN);
                     connect.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_disabled, 0, 0);
                 } else {
                     footer.setBackgroundColor(Color.RED);
                     mBluetoothAdapter.disable();
-                    btStatus=false;
+                    btStatus = false;
                     connect.setText("TURN ON");
+                    status.setBackgroundColor(Color.RED);
                     connect.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_connect, 0, 0);
                 }
             }
@@ -156,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onClick(View v) {
                 footer.setBackgroundColor(getResources().getColor(R.color.material_blue));
-                PermissionUtils.showAlert(MainActivity.this);
+                PermissionUtils.showHomeAlert(MainActivity.this);
             }
         });
     }
@@ -164,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK) {
+        if (requestCode == CHECK_SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
             getLocation();
         }
     }
@@ -180,8 +190,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        mGoogleApiClient.disconnect();
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.disconnect();
         stopLocationUpdates();
     }
 
@@ -216,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                        PLAY_SERVICES_RESOLUTION_REQUEST_CODE).show();
             } else {
                 Toast.makeText(getApplicationContext(), "This device is not supported.", Toast.LENGTH_LONG).show();
                 finish();
@@ -256,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try {
-                            locationSettingsResult.getStatus().startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+                            locationSettingsResult.getStatus().startResolutionForResult(MainActivity.this, CHECK_SETTINGS_REQUEST_CODE);
                         } catch (IntentSender.SendIntentException e) {
                             e.printStackTrace();
                         }
@@ -290,10 +300,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     e.printStackTrace();
                 }
                 Toast.makeText(this, String.valueOf(lati), Toast.LENGTH_SHORT).show();
-                SharedPreferences.Editor editor=getSharedPreferences(MY_PREFS_NAME,MODE_PRIVATE).edit();
-                editor.putString("lat",String.valueOf(lati));
-                editor.putString("long",String.valueOf(longi));
-                editor.putString("add",String.valueOf(address));
+                SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+                editor.putString(PREF_LATEST_LAT, String.valueOf(lati));
+                editor.putString(PREF_LATEST_LONG, String.valueOf(longi));
+                editor.putString(PREF_LATEST_ADDRESS, String.valueOf(address));
                 editor.apply();
             } else {
                 Toast.makeText(this, "Fetching Your Location", Toast.LENGTH_SHORT).show();
@@ -314,12 +324,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (!mRequestingLocationUpdates) {
             locateBtn.setText("DON'T TRACK");
-            locateBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_location_off,0,0);
+            locateBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_location_off, 0, 0);
             mRequestingLocationUpdates = true;
             startLocationUpdates();
         } else {
             locateBtn.setText("TRACK");
-            locateBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_locate,0,0);
+            locateBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_locate, 0, 0);
             mRequestingLocationUpdates = false;
             stopLocationUpdates();
         }

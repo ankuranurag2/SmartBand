@@ -6,17 +6,21 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:background="@drawable/grey_border"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="15dp">
+        android:gravity="center_vertical"
+        android:padding="15dp"
+        android:elevation="5dp"
+        android:layout_margin="10dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/bluetooth_status"
             android:textColor="#000"
-            android:textSize="18sp" />
+            android:textSize="20sp" />
 
         <Space
             android:layout_width="0dp"

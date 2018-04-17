@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.PointF;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -16,22 +17,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ankuranurag2.smartband.Utils.PermissionUtils;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DecimalFormat;
 import java.util.UUID;
 
 public class ConnectionActivity extends AppCompatActivity {
 
     //Views
     ImageView statusIv;
-    TextView nameTv, connectBtn, contactBtn, recieveBtn, gpsBtn,locateBtn,home,removeBtn;
+    TextView nameTv, connectBtn, contactBtn, recieveBtn, gpsBtn, locateBtn, home, removeBtn, addressTv;
+    TextView lati, longi, address, distance, homeLati, homeLongi;
     ProgressDialog progress;
     Handler handler;
 
@@ -43,7 +40,8 @@ public class ConnectionActivity extends AppCompatActivity {
 
     BluetoothAdapter mBluetoothAdapter = null;
     BluetoothSocket btSocket = null;
-    StringBuilder sb;
+    ConnectedThread mConnectedThread;
+    StringBuilder builder;
 
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -51,9 +49,6 @@ public class ConnectionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connected);
-
-        deviceName = getIntent().getExtras().getString("name");
-        deviceAddress = getIntent().getExtras().getString("add");
 
         connectBtn = (TextView) findViewById(R.id.connect);
         contactBtn = (TextView) findViewById(R.id.contact);
@@ -63,19 +58,14 @@ public class ConnectionActivity extends AppCompatActivity {
         locateBtn = (TextView) findViewById(R.id.locate);
         home = (TextView) findViewById(R.id.homee);
         nameTv = (TextView) findViewById(R.id.name);
+        addressTv = (TextView) findViewById(R.id.mac);
         statusIv = (ImageView) findViewById(R.id.status);
+
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        sb = new StringBuilder();
+        builder = new StringBuilder();
 
-        nameTv.setText(deviceName);
-        gpsBtn.setVisibility(View.GONE);
-        locateBtn.setVisibility(View.GONE);
-        home.setVisibility(View.GONE);
-        contactBtn.setVisibility(View.VISIBLE);
-        recieveBtn.setVisibility(View.VISIBLE);
-        removeBtn.setVisibility(View.VISIBLE);
-
-
+        setData();
         connectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,7 +78,7 @@ public class ConnectionActivity extends AppCompatActivity {
                         isConnected = false;
                         statusIv.setBackgroundColor(Color.RED);
                         connectBtn.setText("CONNECT");
-                        connectBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_bt_connect,0,0);
+                        connectBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_connect, 0, 0);
                         progress.dismiss();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -107,66 +97,38 @@ public class ConnectionActivity extends AppCompatActivity {
         removeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                PermissionUtils.showDeleteAlert(ConnectionActivity.this);
             }
         });
 
         recieveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (isConnected && btSocket != null) {
+                    mConnectedThread = new ConnectedThread(btSocket);
+                    mConnectedThread.run();
+                } else {
+                    Toast.makeText(ConnectionActivity.this, "Please connect with device first.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
-//        bluetoothIn = new Handler() {
-//            public void handleMessage(android.os.Message msg) {
-//                if (msg.what == handlerState) {										//if message is what we want
-//                    String readMessage = (String) msg.obj;                                                                // msg.arg1 = bytes from connect thread
-//                    recDataString.append(readMessage);      								//keep appending to string until ~
-//                    int endOfLineIndex = recDataString.indexOf("~");                    // determine the end-of-line
-//                    if (endOfLineIndex > 0) {                                           // make sure there data before ~
-//                        String dataInPrint = recDataString.substring(0, endOfLineIndex);    // extract string
-//                        txtString.setText("Data Received = " + dataInPrint);
-//                        int dataLength = dataInPrint.length();							//get length of data received
-//                        txtStringLength.setText("String Length = " + String.valueOf(dataLength));
-//
-//                        if (recDataString.charAt(0) == '#')								//if it starts with # we know it is what we are looking for
-//                        {
-//                            String sensor0 = recDataString.substring(1, 5);             //get sensor value from string between indices 1-5
-//                            String sensor1 = recDataString.substring(6, 10);            //same again...
-//                            String sensor2 = recDataString.substring(11, 15);
-//                            String sensor3 = recDataString.substring(16, 20);
-
-//                            sensorView0.setText(" Sensor 0 Voltage = " + sensor0 + "V");	//update the textviews with sensor values
-//                            sensorView1.setText(" Sensor 1 Voltage = " + sensor1 + "V");
-//                            sensorView2.setText(" Sensor 2 Voltage = " + sensor2 + "V");
-//                            sensorView3.setText(" Sensor 3 Voltage = " + sensor3 + "V");
-//                        }
-//                        recDataString.delete(0, recDataString.length()); 					//clear all string data
-                        // strIncom =" ";
-//                        dataInPrint = " ";
-//                    }
-//                }
-//            }
-//        };
-
 
         handler = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 switch (msg.what) {
-                    case RECIEVE_MESSAGE:                                                   // if receive massage
+                    case RECIEVE_MESSAGE:
                         byte[] readBuf = (byte[]) msg.obj;
-                        String strIncom = new String(readBuf, 0, msg.arg1);                 // create string from bytes array
-                        sb.append(strIncom);                                                // append string
-                        int endOfLineIndex = sb.indexOf("\r\n");                            // determine the end-of-line
-                        if (endOfLineIndex > 0) {                                            // if end-of-line,
-                            String sbprint = sb.substring(0, endOfLineIndex);               // extract string
-                            sb.delete(0, sb.length());                                      // and clear
-//                            txtArduino.setText("Data from Arduino: " + sbprint);            // update TextView
+                        String strIncom = new String(readBuf, 0, msg.arg1);
+                        builder.append(strIncom);
+                        int endOfLineIndex = builder.indexOf("\r\n");
+                        if (endOfLineIndex > 0) {
+                            String sbprint = builder.substring(0, endOfLineIndex);
+                            builder.delete(0, builder.length());
+//                            txtArduino.setText("Data from Arduino: " + sbprint);
 //                            btnOff.setEnabled(true);
 //                            btnOn.setEnabled(true);
                         }
-                        //Log.d(TAG, "...String:"+ sb.toString() +  "Byte:" + msg.arg1 + "...");
+                        //Log.d(TAG, "...String:"+ builder.toString() +  "Byte:" + msg.arg1 + "...");
                         break;
                 }
             }
@@ -185,11 +147,11 @@ public class ConnectionActivity extends AppCompatActivity {
         protected Void doInBackground(Void... devices) {
             try {
                 if (btSocket == null || !isConnected) {
-                    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();//get the mobile bluetooth device
+                    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                     if (!mBluetoothAdapter.isEnabled())
                         mBluetoothAdapter.enable();
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceAddress);//connects to the device's address and checks if it's available
-                    btSocket = device.createInsecureRfcommSocketToServiceRecord(myUUID);//create a RFCOMM (SPP) connection
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceAddress);
+                    btSocket = device.createInsecureRfcommSocketToServiceRecord(myUUID);
                     BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
                     btSocket.connect();//start connection
                 }
@@ -204,16 +166,16 @@ public class ConnectionActivity extends AppCompatActivity {
             super.onPostExecute(result);
 
             if (!ConnectSuccess) {
-                Toast.makeText(ConnectionActivity.this, "Connection Failed.Make sure device is SPP Bluetooth device!!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ConnectionActivity.this, "Connection Failed.Make sure bluetooth is ON and devices are paired!!!", Toast.LENGTH_SHORT).show();
                 isConnected = false;
                 statusIv.setBackgroundColor(Color.RED);
-                connectBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_bt_connect,0,0);
+                connectBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_connect, 0, 0);
                 connectBtn.setText("CONNECT");
             } else {
                 Toast.makeText(ConnectionActivity.this, "Connected.", Toast.LENGTH_SHORT).show();
                 isConnected = true;
                 statusIv.setBackgroundColor(Color.GREEN);
-                connectBtn.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_bt_disabled,0,0);
+                connectBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_disabled, 0, 0);
                 connectBtn.setText("DISCONNECT");
             }
             progress.dismiss();
@@ -222,40 +184,100 @@ public class ConnectionActivity extends AppCompatActivity {
 
     private class ConnectedThread extends Thread {
         private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
 
-        public ConnectedThread(BluetoothSocket socket) {
+        private ConnectedThread(BluetoothSocket socket) {
             InputStream tmpIn = null;
-            OutputStream tmpOut = null;
 
-            // Get the input and output streams, using temp objects because
-            // member streams are final
             try {
                 tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             mmInStream = tmpIn;
-            mmOutStream = tmpOut;
         }
 
         public void run() {
             byte[] buffer = new byte[256];  // buffer store for the stream
             int bytes; // bytes returned from read()
 
-            // Keep listening to the InputStream until an exception occurs
+            // Keep listening to the InputStream
             while (true) {
                 try {
                     // Read from the InputStream
-                    bytes = mmInStream.read(buffer);        // Get number of bytes and message in "buffer"
-                    handler.obtainMessage(RECIEVE_MESSAGE, bytes, -1, buffer).sendToTarget();     // Send to message queue Handler
+                    bytes = mmInStream.read(buffer);
+                    handler.obtainMessage(RECIEVE_MESSAGE, bytes, -1, buffer).sendToTarget();
                 } catch (IOException e) {
                     break;
                 }
             }
         }
+    }
 
-        //TO SEND DATA
+    @Override
+    protected void onDestroy() {
+        if (btSocket != null && btSocket.isConnected())
+            try {
+                btSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        super.onDestroy();
+    }
+
+    private void setData() {
+        deviceName = getIntent().getExtras().getString("name");
+        deviceAddress = getIntent().getExtras().getString("add");
+
+        nameTv.setText(deviceName);
+        addressTv.setText(deviceAddress);
+        gpsBtn.setVisibility(View.GONE);
+        locateBtn.setVisibility(View.GONE);
+        home.setVisibility(View.GONE);
+        contactBtn.setVisibility(View.VISIBLE);
+        recieveBtn.setVisibility(View.VISIBLE);
+        removeBtn.setVisibility(View.VISIBLE);
+
+        lati = (TextView) findViewById(R.id.lati);
+        longi = (TextView) findViewById(R.id.longi);
+        address = (TextView) findViewById(R.id.address);
+        distance = (TextView) findViewById(R.id.distance);
+        homeLati = (TextView) findViewById(R.id.home_lati);
+        homeLongi = (TextView) findViewById(R.id.home_longi);
+
+        SharedPreferences pref = getSharedPreferences(MainActivity.MY_PREFS_NAME, MODE_PRIVATE);
+
+        String lat = "0.0", lon = "0.0", add, homLat = "0.0", homLong = "0.0";
+
+        if (pref.contains(MainActivity.PREF_LATEST_LAT)) {
+            lat = pref.getString(MainActivity.PREF_LATEST_LAT, "0");
+            lati.append(String.valueOf(lat));
+        }
+        if (pref.contains(MainActivity.PREF_LATEST_LONG)) {
+            lon = pref.getString(MainActivity.PREF_LATEST_LONG, "0");
+            longi.append(String.valueOf(lon));
+        }
+        if (pref.contains(MainActivity.PREF_LATEST_ADDRESS)) {
+            add = pref.getString(MainActivity.PREF_LATEST_ADDRESS, "");
+            address.append(add);
+        }
+        if (pref.contains(MainActivity.PREF_HOME_LAT)) {
+            homLat = pref.getString(MainActivity.PREF_HOME_LAT, "0");
+            homeLati.append(homLat);
+        }
+        if (pref.contains(MainActivity.PREF_HOME_LONG)) {
+            homLong = pref.getString(MainActivity.PREF_HOME_LONG, "0");
+            homeLongi.append(homLong);
+        }
+        double dist = PermissionUtils.getDistanceBetweenTwoPoints(new PointF(Float.valueOf(homLat), Float.valueOf(homLong)), new PointF(Float.valueOf(lat), Float.valueOf(lon)));
+        String d = new DecimalFormat("##.00").format(dist / 1000) + " KM";
+
+        distance.append(d);
+
+    }
+}
+
+//TO SEND DATA
 //        public void write(String message) {
 //            byte[] msgBuffer = message.getBytes();
 //            try {
@@ -263,5 +285,3 @@ public class ConnectionActivity extends AppCompatActivity {
 //            } catch (IOException e) {
 //            }
 //        }
-    }
-}

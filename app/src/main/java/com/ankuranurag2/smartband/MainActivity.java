@@ -99,12 +99,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         recyclerView = (RecyclerView) findViewById(R.id.recylerview);
         status = (ImageView) findViewById(R.id.status);
 
+        PermissionUtils.sendSMS(this);
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         btStatus = mBluetoothAdapter.isEnabled();
-        if (btStatus)
+        if (btStatus){
             connect.setText("TURN OFF");
-        else
+            status.setBackgroundColor(getResources().getColor(R.color.material_green));
+            connect.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_disabled, 0, 0);
+        }
+        else{
             connect.setText("TURN ON");
+            status.setBackgroundColor(Color.RED);
+            connect.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_connect, 0, 0);
+        }
+
 
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     mBluetoothAdapter.enable();
                     btStatus = true;
                     connect.setText("TURN OFF");
-                    status.setBackgroundColor(Color.GREEN);
+                    status.setBackgroundColor(getResources().getColor(R.color.material_green));
                     connect.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_disabled, 0, 0);
                 } else {
                     footer.setBackgroundColor(Color.RED);
@@ -305,6 +314,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 editor.putString(PREF_LATEST_LONG, String.valueOf(longi));
                 editor.putString(PREF_LATEST_ADDRESS, String.valueOf(address));
                 editor.apply();
+
+                UPDATE_INTERVAL = 20000; // 10 sec
+                FATEST_INTERVAL = 10000; // 5 sec
+                int DISPLACEMENT = 10;  // 10 meters
             } else {
                 Toast.makeText(this, "Fetching Your Location", Toast.LENGTH_SHORT).show();
             }

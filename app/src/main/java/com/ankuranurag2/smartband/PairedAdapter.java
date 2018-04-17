@@ -32,6 +32,7 @@ public class PairedAdapter extends RecyclerView.Adapter<PairedAdapter.PairedView
     public void onBindViewHolder(PairedViewHolder holder, int position) {
         String name = pairedList.get(position).getDeviceName();
         holder.deviceName.setText(name);
+        holder.deviceAdd.setText(pairedList.get(position).getDeviceAddr());
     }
 
     @Override
@@ -41,11 +42,12 @@ public class PairedAdapter extends RecyclerView.Adapter<PairedAdapter.PairedView
 
     public class PairedViewHolder extends RecyclerView.ViewHolder {
 
-        TextView deviceName;
+        TextView deviceName,deviceAdd;
 
         public PairedViewHolder(final View itemView) {
             super(itemView);
             deviceName = (TextView) itemView.findViewById(R.id.device_text_view);
+            deviceAdd = (TextView) itemView.findViewById(R.id.device_mac);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -315,8 +316,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 editor.putString(PREF_LATEST_ADDRESS, String.valueOf(address));
                 editor.apply();
 
-                UPDATE_INTERVAL = 20000; // 10 sec
-                FATEST_INTERVAL = 10000; // 5 sec
+                UPDATE_INTERVAL = 20000; // 20 sec
+                FATEST_INTERVAL = 10000; // 10 sec
                 int DISPLACEMENT = 10;  // 10 meters
             } else {
                 Toast.makeText(this, "Fetching Your Location", Toast.LENGTH_SHORT).show();

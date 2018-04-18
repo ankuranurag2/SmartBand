@@ -9,8 +9,10 @@ import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,6 +22,7 @@ import com.ankuranurag2.smartband.Utils.PermissionUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
@@ -28,20 +31,23 @@ public class ConnectionActivity extends AppCompatActivity {
     //Views
     ImageView statusIv;
     TextView nameTv, connectBtn, contactBtn, recieveBtn, gpsBtn, locateBtn, home, removeBtn, addressTv;
-    TextView lati, longi, address, distance, homeLati, homeLongi;
+    TextView lati, longi, address, distance, homeLati, homeLongi, sendBtn;
     ProgressDialog progress;
-    Handler handler;
 
     //data
     String deviceName, deviceAddress;
     boolean isConnected = false;
 
-    final int RECIEVE_MESSAGE = 1;     //used to identify handler message
-
     BluetoothAdapter mBluetoothAdapter = null;
     BluetoothSocket btSocket = null;
-    ConnectedThread mConnectedThread;
-    StringBuilder builder;
+
+    //After connection
+    OutputStream mmOutputStream;
+    InputStream mmInputStream;
+    volatile boolean stopWorker;
+    Thread workerThread;
+    byte[] readBuffer;
+    int readBufferPosition;
 
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -63,7 +69,6 @@ public class ConnectionActivity extends AppCompatActivity {
 
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        builder = new StringBuilder();
 
         setData();
         connectBtn.setOnClickListener(new View.OnClickListener() {
@@ -72,17 +77,18 @@ public class ConnectionActivity extends AppCompatActivity {
                 if (!isConnected)
                     new ConnectBT().execute();
                 else {
+                    progress = ProgressDialog.show(ConnectionActivity.this, "Disconnecting...", "Please wait!!!");
+
                     try {
-                        progress = ProgressDialog.show(ConnectionActivity.this, "Disconnecting...", "Please wait!!!");
-                        btSocket.close();
-                        isConnected = false;
-                        statusIv.setBackgroundColor(Color.RED);
-                        connectBtn.setText("CONNECT");
-                        connectBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_connect, 0, 0);
-                        progress.dismiss();
-                    } catch (IOException e) {
+                        closeBT();
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
+                    isConnected = false;
+                    statusIv.setBackgroundColor(Color.RED);
+                    connectBtn.setText("CONNECT");
+                    connectBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_connect, 0, 0);
+                    progress.dismiss();
                 }
             }
         });
@@ -104,35 +110,32 @@ public class ConnectionActivity extends AppCompatActivity {
         recieveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isConnected && btSocket != null) {
-                    mConnectedThread = new ConnectedThread(btSocket);
-                    mConnectedThread.run();
-                } else {
+                if (btSocket != null) {
+                    if (btSocket.isConnected()) {
+                        try {
+                            listenForData();
+                            recieveBtn.setEnabled(false);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else
+                        Toast.makeText(ConnectionActivity.this, "Please connect with device first.", Toast.LENGTH_SHORT).show();
+                } else
                     Toast.makeText(ConnectionActivity.this, "Please connect with device first.", Toast.LENGTH_SHORT).show();
-                }
+
             }
         });
+    }
 
-        handler = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                switch (msg.what) {
-                    case RECIEVE_MESSAGE:
-                        byte[] readBuf = (byte[]) msg.obj;
-                        String strIncom = new String(readBuf, 0, msg.arg1);
-                        builder.append(strIncom);
-                        int endOfLineIndex = builder.indexOf("\r\n");
-                        if (endOfLineIndex > 0) {
-                            String sbprint = builder.substring(0, endOfLineIndex);
-                            builder.delete(0, builder.length());
-//                            txtArduino.setText("Data from Arduino: " + sbprint);
-//                            btnOff.setEnabled(true);
-//                            btnOn.setEnabled(true);
-                        }
-                        //Log.d(TAG, "...String:"+ builder.toString() +  "Byte:" + msg.arg1 + "...");
-                        break;
-                }
+    @Override
+    protected void onDestroy() {
+        if (btSocket != null && btSocket.isConnected())
+            try {
+                closeBT();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        };
+        super.onDestroy();
     }
 
     private class ConnectBT extends AsyncTask<Void, Void, Void> {
@@ -174,6 +177,7 @@ public class ConnectionActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(ConnectionActivity.this, "Connected.", Toast.LENGTH_SHORT).show();
                 isConnected = true;
+                recieveBtn.setEnabled(true);
                 statusIv.setBackgroundColor(Color.GREEN);
                 connectBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_disabled, 0, 0);
                 connectBtn.setText("DISCONNECT");
@@ -182,47 +186,62 @@ public class ConnectionActivity extends AppCompatActivity {
         }
     }
 
-    private class ConnectedThread extends Thread {
-        private final InputStream mmInStream;
+    private void listenForData() throws IOException {
+        mmInputStream=btSocket.getInputStream();
+        final Handler handler = new Handler();
+        final byte delimiter = 10; //This is the ASCII code for a newline character
 
-        private ConnectedThread(BluetoothSocket socket) {
-            InputStream tmpIn = null;
+        stopWorker = false;
+        readBufferPosition = 0;
+        readBuffer = new byte[256];
+        workerThread = new Thread(new Runnable() {
+            public void run() {
+                while (!Thread.currentThread().isInterrupted() && !stopWorker) {
+                    try {
+                        int bytesAvailable = mmInputStream.available();
+                        if (bytesAvailable > 0) {
+                            byte[] packetBytes = new byte[bytesAvailable];
+                            mmInputStream.read(packetBytes);
+                            for (int i = 0; i < bytesAvailable; i++) {
+                                byte b = packetBytes[i];
+                                if (b == delimiter) {
+                                    byte[] encodedBytes = new byte[readBufferPosition];
+                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+                                    final String data = new String(encodedBytes, "US-ASCII");
+                                    readBufferPosition = 0;
 
-            try {
-                tmpIn = socket.getInputStream();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            mmInStream = tmpIn;
-        }
-
-        public void run() {
-            byte[] buffer = new byte[256];  // buffer store for the stream
-            int bytes; // bytes returned from read()
-
-            // Keep listening to the InputStream
-            while (true) {
-                try {
-                    // Read from the InputStream
-                    bytes = mmInStream.read(buffer);
-                    handler.obtainMessage(RECIEVE_MESSAGE, bytes, -1, buffer).sendToTarget();
-                } catch (IOException e) {
-                    break;
+                                    handler.post(new Runnable() {
+                                        public void run() {
+//                                            data
+                                        }
+                                    });
+                                } else {
+                                    readBuffer[readBufferPosition++] = b;
+                                }
+                            }
+                        }
+                    } catch (IOException ex) {
+                        stopWorker = true;
+                    }
                 }
             }
-        }
+        });
+
+        workerThread.start();
     }
 
-    @Override
-    protected void onDestroy() {
-        if (btSocket != null && btSocket.isConnected())
-            try {
-                btSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        super.onDestroy();
+    void sendData() throws IOException {
+        mmOutputStream = btSocket.getOutputStream();
+        String msg = "#1~";
+        msg += "\n";
+        mmOutputStream.write(msg.getBytes());
+    }
+
+    void closeBT() throws Exception {
+        stopWorker = true;
+        mmOutputStream.close();
+        mmInputStream.close();
+        btSocket.close();
     }
 
     private void setData() {
@@ -273,15 +292,7 @@ public class ConnectionActivity extends AppCompatActivity {
         String d = new DecimalFormat("##.00").format(dist / 1000) + " KM";
 
         distance.append(d);
-
     }
 }
 
-//TO SEND DATA
-//        public void write(String message) {
-//            byte[] msgBuffer = message.getBytes();
-//            try {
-//                mmOutStream.write(msgBuffer);
-//            } catch (IOException e) {
-//            }
-//        }
+

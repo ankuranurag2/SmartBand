@@ -32,21 +32,28 @@
             style="@style/bottom_toolbar_item"
             android:drawableTop="@drawable/ic_person"
             android:text="ADD CONTACT"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/remove"
             style="@style/bottom_toolbar_item"
             android:drawableTop="@drawable/ic_remove_icon"
             android:text="REMOVE CONTACT"
-            android:visibility="gone"/>
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/send"
+            style="@style/bottom_toolbar_item"
+            android:drawableTop="@drawable/ic_publish_white_24dp"
+            android:text="SEND DATA"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/recieve"
             style="@style/bottom_toolbar_item"
-            android:drawableTop="@drawable/ic_swap_vert_white_24dp"
+            android:drawableTop="@drawable/ic_file_download_white_24dp"
             android:text="RECIEVE DATA"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/gps"

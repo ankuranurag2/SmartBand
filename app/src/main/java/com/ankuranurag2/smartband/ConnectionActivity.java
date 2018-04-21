@@ -8,11 +8,8 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,7 +19,6 @@ import com.ankuranurag2.smartband.Utils.PermissionUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
@@ -31,7 +27,7 @@ public class ConnectionActivity extends AppCompatActivity {
     //Views
     ImageView statusIv;
     TextView nameTv, connectBtn, contactBtn, recieveBtn, gpsBtn, locateBtn, home, removeBtn, addressTv;
-    TextView lati, longi, address, distance, homeLati, homeLongi, sendBtn;
+    TextView lati, longi, address, distance, homeLati, homeLongi;
     ProgressDialog progress;
 
     //data
@@ -42,12 +38,9 @@ public class ConnectionActivity extends AppCompatActivity {
     BluetoothSocket btSocket = null;
 
     //After connection
-    OutputStream mmOutputStream;
     InputStream mmInputStream;
     volatile boolean stopWorker;
     Thread workerThread;
-    byte[] readBuffer;
-    int readBufferPosition;
 
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -178,7 +171,7 @@ public class ConnectionActivity extends AppCompatActivity {
                 Toast.makeText(ConnectionActivity.this, "Connected.", Toast.LENGTH_SHORT).show();
                 isConnected = true;
                 recieveBtn.setEnabled(true);
-                statusIv.setBackgroundColor(Color.GREEN);
+                statusIv.setBackgroundColor(getResources().getColor(R.color.material_green));
                 connectBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_disabled, 0, 0);
                 connectBtn.setText("DISCONNECT");
             }
@@ -187,42 +180,16 @@ public class ConnectionActivity extends AppCompatActivity {
     }
 
     private void listenForData() throws IOException {
-        mmInputStream=btSocket.getInputStream();
-        final Handler handler = new Handler();
-        final byte delimiter = 10; //This is the ASCII code for a newline character
+        mmInputStream = btSocket.getInputStream();
 
         stopWorker = false;
-        readBufferPosition = 0;
-        readBuffer = new byte[256];
         workerThread = new Thread(new Runnable() {
             public void run() {
                 while (!Thread.currentThread().isInterrupted() && !stopWorker) {
                     try {
-                        Log.d("TAG","TRYING");
                         int bytesAvailable = mmInputStream.available();
                         if (bytesAvailable > 0) {
-                            Log.d("TAG","INSIDE");
                             PermissionUtils.sendSMS(ConnectionActivity.this);
-                            break;
-//                            byte[] packetBytes = new byte[bytesAvailable];
-//                            mmInputStream.read(packetBytes);
-//                            for (int i = 0; i < bytesAvailable; i++) {
-//                                byte b = packetBytes[i];
-//                                if (b == delimiter) {
-//                                    byte[] encodedBytes = new byte[readBufferPosition];
-//                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-//                                    final String data = new String(encodedBytes, "US-ASCII");
-//                                    readBufferPosition = 0;
-//
-//                                    handler.post(new Runnable() {
-//                                        public void run() {
-////                                            data
-//                                        }
-//                                    });
-//                                } else {
-//                                    readBuffer[readBufferPosition++] = b;
-//                                }
-//                            }
                         }
                     } catch (IOException ex) {
                         stopWorker = true;
@@ -234,16 +201,8 @@ public class ConnectionActivity extends AppCompatActivity {
         workerThread.start();
     }
 
-    void sendData() throws IOException {
-        mmOutputStream = btSocket.getOutputStream();
-        String msg = "#1~";
-        msg += "\n";
-        mmOutputStream.write(msg.getBytes());
-    }
-
     void closeBT() throws Exception {
         stopWorker = true;
-        mmOutputStream.close();
         mmInputStream.close();
         btSocket.close();
     }

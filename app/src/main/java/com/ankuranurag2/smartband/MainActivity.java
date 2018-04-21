@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -39,6 +40,8 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +61,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     //Data
     double lati, longi;
-    String address;
-    Boolean btStatus=false;
+    Boolean btStatus = false;
 
     //GPS
     GoogleApiClient mGoogleApiClient;
@@ -302,27 +304,36 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 mLastLocation = location;
                 lati = location.getLatitude();
                 longi = location.getLongitude();
-
+                String address="";
                 Geocoder coder = new Geocoder(this, Locale.getDefault());
                 try {
                     List<Address> list = coder.getFromLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1);
                     if (list != null && list.size() > 0) {
                         Address data = list.get(0);
-                        address = data.getSubLocality() + "," + data.getLocality() + "," + data.getPostalCode();
+                        String subLocality = data.getSubLocality();
+                        String locality = data.getLocality();
+                        String postalCode = data.getPostalCode();
+                        if (subLocality != null && !subLocality.isEmpty())
+                            address += subLocality;
+                        if (locality != null && !locality.isEmpty())
+                            address += "," + locality;
+                        if (postalCode != null && !postalCode.isEmpty())
+                            address += "," + postalCode;
+                        Log.d("TAG",address);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                Toast.makeText(this, String.valueOf(lati), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Got your location.", Toast.LENGTH_SHORT).show();
                 SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
                 editor.putString(PREF_LATEST_LAT, String.valueOf(lati));
                 editor.putString(PREF_LATEST_LONG, String.valueOf(longi));
                 editor.putString(PREF_LATEST_ADDRESS, String.valueOf(address));
-                editor.apply();
+                editor.commit();
 
                 UPDATE_INTERVAL = 20000; // 20 sec
                 FATEST_INTERVAL = 10000; // 10 sec
-                int DISPLACEMENT = 10;  // 10 meters
+                DISPLACEMENT = 10;  // 10 meters
             } else {
                 Toast.makeText(this, "Fetching Your Location", Toast.LENGTH_SHORT).show();
             }

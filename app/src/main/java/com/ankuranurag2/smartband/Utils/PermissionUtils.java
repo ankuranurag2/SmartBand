@@ -131,8 +131,8 @@ public class PermissionUtils {
                     public void onClick(DialogInterface dialog, int which) {
                         SharedPreferences pref = context.getSharedPreferences(MainActivity.MY_PREFS_NAME, MODE_PRIVATE);
                         SharedPreferences.Editor editor = pref.edit();
-                        editor.putString(MainActivity.PREF_HOME_LAT,"28.6692"); //pref.getString(MainActivity.PREF_LATEST_LAT, "0"));
-                        editor.putString(MainActivity.PREF_HOME_LONG, "77.4538");//pref.getString(MainActivity.PREF_LATEST_LONG, "0"));
+                        editor.putString(MainActivity.PREF_HOME_LAT, pref.getString(MainActivity.PREF_LATEST_LAT, "0"));
+                        editor.putString(MainActivity.PREF_HOME_LONG, pref.getString(MainActivity.PREF_LATEST_LONG, "0"));
                         editor.commit();
                         Toast.makeText(context, "Home address updated.", Toast.LENGTH_SHORT).show();
                         dialog.dismiss();

@@ -46,7 +46,7 @@
             android:id="@+id/status"
             android:layout_width="50dp"
             android:layout_height="30dp"
-            android:background="@color/material_red" />
+            android:background="#f00" />
     </LinearLayout>
 
     <TextView
@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:text="Your details:"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold" />
 
     <TextView
@@ -64,7 +64,7 @@
         android:layout_margin="10dp"
         android:text="Latitude: "
         android:textColor="#000"
-        android:textSize="16sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/longi"
@@ -73,7 +73,7 @@
         android:layout_margin="10dp"
         android:text="Longitude: "
         android:textColor="#000"
-        android:textSize="16sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/address"
@@ -82,16 +82,16 @@
         android:layout_margin="10dp"
         android:text="Address: "
         android:textColor="#000"
-        android:textSize="16sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="Away from home (kms): "
+        android:text="Away from home (Kms): "
         android:textColor="#000"
-        android:textSize="16sp" />
+        android:textSize="15sp" />
 
 
     <TextView
@@ -99,7 +99,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:text="Home details:"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold" />
 
     <TextView
@@ -109,7 +109,7 @@
         android:layout_margin="10dp"
         android:text="Home Latitude: "
         android:textColor="#000"
-        android:textSize="16sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/home_longi"
@@ -118,7 +118,7 @@
         android:layout_margin="10dp"
         android:text="Home Longitude: "
         android:textColor="#000"
-        android:textSize="16sp" />
+        android:textSize="15sp" />
 
     <Space
         android:layout_width="match_parent"

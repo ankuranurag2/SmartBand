@@ -101,12 +101,13 @@ public class PermissionUtils {
                     ex.printStackTrace();
                 }
             }
+            return;
         } else
             Toast.makeText(context, "Contact list empty!!!", Toast.LENGTH_SHORT).show();
     }
 
     public static double getDistanceBetweenTwoPoints(PointF p1, PointF p2) {
-        double R = 6371000; // m
+        double R = 6371000;
         double dLat = Math.toRadians(p2.x - p1.x);
         double dLon = Math.toRadians(p2.y - p1.y);
         double lat1 = Math.toRadians(p1.x);

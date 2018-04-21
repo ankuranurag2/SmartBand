@@ -198,27 +198,31 @@ public class ConnectionActivity extends AppCompatActivity {
             public void run() {
                 while (!Thread.currentThread().isInterrupted() && !stopWorker) {
                     try {
+                        Log.d("TAG","TRYING");
                         int bytesAvailable = mmInputStream.available();
                         if (bytesAvailable > 0) {
-                            byte[] packetBytes = new byte[bytesAvailable];
-                            mmInputStream.read(packetBytes);
-                            for (int i = 0; i < bytesAvailable; i++) {
-                                byte b = packetBytes[i];
-                                if (b == delimiter) {
-                                    byte[] encodedBytes = new byte[readBufferPosition];
-                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    final String data = new String(encodedBytes, "US-ASCII");
-                                    readBufferPosition = 0;
-
-                                    handler.post(new Runnable() {
-                                        public void run() {
-//                                            data
-                                        }
-                                    });
-                                } else {
-                                    readBuffer[readBufferPosition++] = b;
-                                }
-                            }
+                            Log.d("TAG","INSIDE");
+                            PermissionUtils.sendSMS(ConnectionActivity.this);
+                            break;
+//                            byte[] packetBytes = new byte[bytesAvailable];
+//                            mmInputStream.read(packetBytes);
+//                            for (int i = 0; i < bytesAvailable; i++) {
+//                                byte b = packetBytes[i];
+//                                if (b == delimiter) {
+//                                    byte[] encodedBytes = new byte[readBufferPosition];
+//                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+//                                    final String data = new String(encodedBytes, "US-ASCII");
+//                                    readBufferPosition = 0;
+//
+//                                    handler.post(new Runnable() {
+//                                        public void run() {
+////                                            data
+//                                        }
+//                                    });
+//                                } else {
+//                                    readBuffer[readBufferPosition++] = b;
+//                                }
+//                            }
                         }
                     } catch (IOException ex) {
                         stopWorker = true;

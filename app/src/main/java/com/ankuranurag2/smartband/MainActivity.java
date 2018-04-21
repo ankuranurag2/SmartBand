@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //Data
     double lati, longi;
     String address;
-    Boolean btStatus;
+    Boolean btStatus=false;
 
     //GPS
     GoogleApiClient mGoogleApiClient;
@@ -100,16 +100,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         recyclerView = (RecyclerView) findViewById(R.id.recylerview);
         status = (ImageView) findViewById(R.id.status);
 
-        PermissionUtils.sendSMS(this);
-
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        btStatus = mBluetoothAdapter.isEnabled();
-        if (btStatus){
+        if (mBluetoothAdapter != null)
+            btStatus = mBluetoothAdapter.isEnabled();
+        else
+            Toast.makeText(this, "Bluetooth not supported.", Toast.LENGTH_SHORT).show();
+
+        if (btStatus) {
             connect.setText("TURN OFF");
             status.setBackgroundColor(getResources().getColor(R.color.material_green));
             connect.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_disabled, 0, 0);
-        }
-        else{
+        } else {
             connect.setText("TURN ON");
             status.setBackgroundColor(Color.RED);
             connect.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_bt_connect, 0, 0);
@@ -158,17 +159,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<BTDevice> pairedList = new ArrayList<BTDevice>();
-                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                for (BluetoothDevice device : pairedDevices) {
-                    BTDevice btDevice = new BTDevice();
-                    btDevice.setDeviceName(device.getName());
-                    btDevice.setDeviceAddr(device.getAddress());
-                    pairedList.add(btDevice);
-                }
-                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                recyclerView.hasFixedSize();
-                recyclerView.setAdapter(new PairedAdapter(pairedList));
+                if (btStatus) {
+                    ArrayList<BTDevice> pairedList = new ArrayList<BTDevice>();
+                    Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                    for (BluetoothDevice device : pairedDevices) {
+                        BTDevice btDevice = new BTDevice();
+                        btDevice.setDeviceName(device.getName());
+                        btDevice.setDeviceAddr(device.getAddress());
+                        pairedList.add(btDevice);
+                    }
+                    recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                    recyclerView.hasFixedSize();
+                    recyclerView.setAdapter(new PairedAdapter(pairedList));
+                } else
+                    Toast.makeText(MainActivity.this, "Please Turn ON Bluetooth.", Toast.LENGTH_SHORT).show();
             }
         });
 

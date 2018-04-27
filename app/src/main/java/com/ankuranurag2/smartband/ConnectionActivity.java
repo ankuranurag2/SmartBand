@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -106,7 +107,7 @@ public class ConnectionActivity extends AppCompatActivity {
                 if (btSocket != null) {
                     if (btSocket.isConnected()) {
                         try {
-                            listenForData();
+                            listenForData(ConnectionActivity.this);
                             recieveBtn.setEnabled(false);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -179,18 +180,21 @@ public class ConnectionActivity extends AppCompatActivity {
         }
     }
 
-    private void listenForData() throws IOException {
+    private void listenForData(final Context context) throws IOException {
         mmInputStream = btSocket.getInputStream();
 
         stopWorker = false;
         workerThread = new Thread(new Runnable() {
             public void run() {
+                byte[] buffer = new byte[256];
+                int bytes;
                 while (!Thread.currentThread().isInterrupted() && !stopWorker) {
                     try {
-                        int bytesAvailable = mmInputStream.available();
-                        if (bytesAvailable > 0) {
-                            PermissionUtils.sendSMS(ConnectionActivity.this);
-                        }
+//                        int bytesAvailable = mmInputStream.available();
+//                        if (bytesAvailable > 0) {
+                        bytes = mmInputStream.read(buffer);
+                        if (bytes > 0)
+                            PermissionUtils.sendSMS(context);
                     } catch (IOException ex) {
                         stopWorker = true;
                     }

@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 mLastLocation = location;
                 lati = location.getLatitude();
                 longi = location.getLongitude();
-                String address="";
+                String address = "";
                 Geocoder coder = new Geocoder(this, Locale.getDefault());
                 try {
                     List<Address> list = coder.getFromLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1);
@@ -316,10 +316,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         if (subLocality != null && !subLocality.isEmpty())
                             address += subLocality;
                         if (locality != null && !locality.isEmpty())
-                            address += "," + locality;
+                            address += ", " + locality;
                         if (postalCode != null && !postalCode.isEmpty())
-                            address += "," + postalCode;
-                        Log.d("TAG",address);
+                            address += ", " + postalCode;
+                        Log.d("TAG", address);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

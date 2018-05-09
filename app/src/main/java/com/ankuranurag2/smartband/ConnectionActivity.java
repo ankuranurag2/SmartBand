@@ -1,14 +1,19 @@
 package com.ankuranurag2.smartband;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PointF;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,10 +22,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ankuranurag2.smartband.Utils.PermissionUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.text.DecimalFormat;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 
 public class ConnectionActivity extends AppCompatActivity {
@@ -90,18 +99,39 @@ public class ConnectionActivity extends AppCompatActivity {
         contactBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PermissionUtils.showContactAlert(ConnectionActivity.this);
+                final SharedPreferences preferences = getSharedPreferences(MainActivity.MY_PREFS_NAME, MODE_PRIVATE);
+                final Gson gson = new Gson();
+                final LinkedHashMap<Integer, String> contactMap;
+                final Type type = new TypeToken<LinkedHashMap<Integer, String>>() {
+                }.getType();
+                if (preferences.contains(MainActivity.PREF_CONTACT_LIST)) {
+                    String jsonString = preferences.getString(MainActivity.PREF_CONTACT_LIST, "");
+                    contactMap = gson.fromJson(jsonString, type);
+                } else
+                    contactMap = new LinkedHashMap<>();
+
+                if (contactMap.size() == 5)
+                    Toast.makeText(ConnectionActivity.this, "Maximum five contacts can be added.", Toast.LENGTH_SHORT).show();
+                else {
+                    Intent i = new Intent(Intent.ACTION_PICK);
+                    i.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+                    startActivityForResult(i, 199);
+                }
             }
         });
 
-        removeBtn.setOnClickListener(new View.OnClickListener() {
+        removeBtn.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
                 PermissionUtils.showDeleteAlert(ConnectionActivity.this);
             }
         });
 
-        recieveBtn.setOnClickListener(new View.OnClickListener() {
+        recieveBtn.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
                 if (btSocket != null) {
@@ -119,6 +149,25 @@ public class ConnectionActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 199 && resultCode == Activity.RESULT_OK) {
+            Uri contactUri = data.getData();
+            Cursor cursor = this.getContentResolver().query(contactUri, null,
+                    null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                String number = cursor.getString(numberIndex);
+                String name = cursor.getString(nameIndex);
+                PermissionUtils.showContactAlert(ConnectionActivity.this, number, name);
+            }
+            cursor.close();
+        }
     }
 
     @Override

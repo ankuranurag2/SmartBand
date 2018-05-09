@@ -316,10 +316,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         if (subLocality != null && !subLocality.isEmpty())
                             address += subLocality;
                         if (locality != null && !locality.isEmpty())
-                            address += ", " + locality;
+                            if (address.isEmpty())
+                                address += locality;
+                            else
+                                address += ", " + locality;
+
                         if (postalCode != null && !postalCode.isEmpty())
-                            address += ", " + postalCode;
-                        Log.d("TAG", address);
+                            if (address.isEmpty())
+                                address += postalCode;
+                            else
+                                address += ", " + postalCode;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

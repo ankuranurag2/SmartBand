@@ -38,7 +38,7 @@ public class PermissionUtils {
     public static void requestPermission(final Activity activity, int REQUEST_CODE) {
         String[] perms = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN,
                 Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION};
+                Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE};
 
         if (!hasPermissions(activity, perms)) {
             ActivityCompat.requestPermissions(activity, perms, REQUEST_CODE);
@@ -180,10 +180,17 @@ public class PermissionUtils {
         input.setHint("Mobile Number");
         input.setInputType(InputType.TYPE_CLASS_PHONE);
         input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(10)});
-        if (number.startsWith("+")) {
-            input.setText(number.substring(3));
-        } else
-            input.setText(number);
+        if (number == null || number.isEmpty())
+            Toast.makeText(context, "No number attached with contact.", Toast.LENGTH_SHORT).show();
+        else {
+            String newNum=number.replace("-", "");
+            if (newNum.startsWith("+")) {
+                input.setText(newNum.substring(3));
+            } else if (newNum.startsWith("0"))
+                input.setText(newNum.substring(1));
+            else
+                input.setText(newNum);
+        }
 
         TextView nameTv = new TextView(context);
         nameTv.setLayoutParams(lp);

@@ -129,11 +129,10 @@ public class ConnectionActivity extends AppCompatActivity {
             }
         });
 
-        recieveBtn.setOnClickListener(new View.OnClickListener()
-
-        {
+        recieveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PermissionUtils.sendSMS(ConnectionActivity.this);
                 if (btSocket != null) {
                     if (btSocket.isConnected()) {
                         try {
@@ -166,7 +165,8 @@ public class ConnectionActivity extends AppCompatActivity {
                 String name = cursor.getString(nameIndex);
                 PermissionUtils.showContactAlert(ConnectionActivity.this, number, name);
             }
-            cursor.close();
+            if (cursor != null)
+                cursor.close();
         }
     }
 

@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public final static String PREF_CONTACT_LIST = "contactList";
     public final static String PREF_HOME_LAT = "homeLat";
     public final static String PREF_HOME_LONG = "homeLong";
+    public final static String PREF_HOME_ADDRESS = "homeAdd";
     public final static String PREF_LATEST_LAT = "lat";
     public final static String PREF_LATEST_LONG = "long";
     public final static String PREF_LATEST_ADDRESS = "add";

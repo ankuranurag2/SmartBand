@@ -98,11 +98,11 @@ public class PermissionUtils {
                     SmsManager smsManager = SmsManager.getDefault();
                     ArrayList<String> parts = smsManager.divideMessage(message);
                     smsManager.sendMultipartTextMessage(contactMap.get(key), null, parts, null, null);
+                    Toast.makeText(context, "Message sent.", Toast.LENGTH_SHORT).show();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
-            Toast.makeText(context, "Message sent.", Toast.LENGTH_SHORT).show();
             return;
         } else
             Toast.makeText(context, "Contact list empty!", Toast.LENGTH_SHORT).show();
@@ -135,6 +135,7 @@ public class PermissionUtils {
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putString(MainActivity.PREF_HOME_LAT, pref.getString(MainActivity.PREF_LATEST_LAT, "0"));
                         editor.putString(MainActivity.PREF_HOME_LONG, pref.getString(MainActivity.PREF_LATEST_LONG, "0"));
+                        editor.putString(MainActivity.PREF_HOME_ADDRESS, pref.getString(MainActivity.PREF_LATEST_ADDRESS, "-----"));
                         editor.commit();
                         Toast.makeText(context, "Home address updated.", Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
@@ -183,7 +184,7 @@ public class PermissionUtils {
         if (number == null || number.isEmpty())
             Toast.makeText(context, "No number attached with contact.", Toast.LENGTH_SHORT).show();
         else {
-            String newNum=number.replace("-", "");
+            String newNum = number.replace("-", "");
             if (newNum.startsWith("+")) {
                 input.setText(newNum.substring(3));
             } else if (newNum.startsWith("0"))
@@ -263,18 +264,18 @@ public class PermissionUtils {
                         .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                List<Integer> keyList = new ArrayList<Integer>(contactMap.keySet());
-                                for (int i = 0; i < checkedContacts.length; i++) {
-                                    if (checkedContacts[i]) {
-                                        Integer key = keyList.get(i);
-                                        contactMap.remove(key);
+                                    List<Integer> keyList = new ArrayList<Integer>(contactMap.keySet());
+                                    for (int i = 0; i < checkedContacts.length; i++) {
+                                        if (checkedContacts[i]) {
+                                            Integer key = keyList.get(i);
+                                            contactMap.remove(key);
+                                            Toast.makeText(context, "Deleted.", Toast.LENGTH_SHORT).show();
+                                        }
                                     }
-                                }
-                                SharedPreferences.Editor editor = preferences.edit();
-                                editor.putString(MainActivity.PREF_CONTACT_LIST, gson.toJson(contactMap, type));
-                                editor.commit();
-                                dialog.dismiss();
-                                Toast.makeText(context, "Deleted.", Toast.LENGTH_SHORT).show();
+                                    SharedPreferences.Editor editor = preferences.edit();
+                                    editor.putString(MainActivity.PREF_CONTACT_LIST, gson.toJson(contactMap, type));
+                                    editor.commit();
+                                    dialog.dismiss();
                             }
                         })
                         .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {

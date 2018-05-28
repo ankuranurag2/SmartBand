@@ -37,7 +37,7 @@ public class ConnectionActivity extends AppCompatActivity {
     //Views
     ImageView statusIv;
     TextView nameTv, connectBtn, contactBtn, recieveBtn, gpsBtn, locateBtn, home, removeBtn, addressTv;
-    TextView lati, longi, address, distance, homeLati, homeLongi;
+    TextView lati, longi, address, distance, homeLati, homeLongi, homeAddress;
     ProgressDialog progress;
 
     //data
@@ -132,7 +132,6 @@ public class ConnectionActivity extends AppCompatActivity {
         recieveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PermissionUtils.sendSMS(ConnectionActivity.this);
                 if (btSocket != null) {
                     if (btSocket.isConnected()) {
                         try {
@@ -239,11 +238,12 @@ public class ConnectionActivity extends AppCompatActivity {
                 int bytes;
                 while (!Thread.currentThread().isInterrupted() && !stopWorker) {
                     try {
-//                        int bytesAvailable = mmInputStream.available();
-//                        if (bytesAvailable > 0) {
-                        bytes = mmInputStream.read(buffer);
-                        if (bytes > 0)
-                            PermissionUtils.sendSMS(context);
+                        int bytesAvailable = mmInputStream.available();
+                        if (bytesAvailable > 0) {
+                            bytes = mmInputStream.read(buffer);
+                            if (bytes > 0)
+                                PermissionUtils.sendSMS(context);
+                        }
                     } catch (IOException ex) {
                         stopWorker = true;
                     }
@@ -279,10 +279,11 @@ public class ConnectionActivity extends AppCompatActivity {
         distance = (TextView) findViewById(R.id.distance);
         homeLati = (TextView) findViewById(R.id.home_lati);
         homeLongi = (TextView) findViewById(R.id.home_longi);
+        homeAddress = (TextView) findViewById(R.id.home_add);
 
         SharedPreferences pref = getSharedPreferences(MainActivity.MY_PREFS_NAME, MODE_PRIVATE);
 
-        String lat = "0.0", lon = "0.0", add, homLat = "0.0", homLong = "0.0";
+        String lat = "0.0", lon = "0.0", add, homLat = "0.0", homLong = "0.0",homeAdd;
 
         if (pref.contains(MainActivity.PREF_LATEST_LAT)) {
             lat = pref.getString(MainActivity.PREF_LATEST_LAT, "0");
@@ -293,7 +294,7 @@ public class ConnectionActivity extends AppCompatActivity {
             longi.append(String.valueOf(lon));
         }
         if (pref.contains(MainActivity.PREF_LATEST_ADDRESS)) {
-            add = pref.getString(MainActivity.PREF_LATEST_ADDRESS, "");
+            add = pref.getString(MainActivity.PREF_LATEST_ADDRESS, "-----");
             address.append(add);
         }
         if (pref.contains(MainActivity.PREF_HOME_LAT)) {
@@ -303,6 +304,10 @@ public class ConnectionActivity extends AppCompatActivity {
         if (pref.contains(MainActivity.PREF_HOME_LONG)) {
             homLong = pref.getString(MainActivity.PREF_HOME_LONG, "0");
             homeLongi.append(homLong);
+        }
+        if (pref.contains(MainActivity.PREF_HOME_ADDRESS)) {
+            homeAdd = pref.getString(MainActivity.PREF_HOME_ADDRESS, "-----");
+            homeAddress.append(homeAdd);
         }
         double dist = PermissionUtils.getDistanceBetweenTwoPoints(new PointF(Float.valueOf(homLat), Float.valueOf(homLong)), new PointF(Float.valueOf(lat), Float.valueOf(lon)));
         String d = new DecimalFormat("##.00").format(dist / 1000) + " KM";

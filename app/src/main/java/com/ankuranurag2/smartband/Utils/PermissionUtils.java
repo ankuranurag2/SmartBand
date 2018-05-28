@@ -184,7 +184,7 @@ public class PermissionUtils {
         if (number == null || number.isEmpty())
             Toast.makeText(context, "No number attached with contact.", Toast.LENGTH_SHORT).show();
         else {
-            String newNum = number.replace("-", "");
+            String newNum = number.replace("-", "").replace(" ","");
             if (newNum.startsWith("+")) {
                 input.setText(newNum.substring(3));
             } else if (newNum.startsWith("0"))

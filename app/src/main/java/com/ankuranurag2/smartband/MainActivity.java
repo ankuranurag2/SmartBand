@@ -337,10 +337,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 editor.putString(PREF_LATEST_LONG, String.valueOf(longi));
                 editor.putString(PREF_LATEST_ADDRESS, String.valueOf(address));
                 editor.commit();
-
-                UPDATE_INTERVAL = 20000; // 20 sec
-                FATEST_INTERVAL = 10000; // 10 sec
-                DISPLACEMENT = 10;  // 10 meters
             } else {
                 Toast.makeText(this, "Fetching Your Location", Toast.LENGTH_SHORT).show();
             }
